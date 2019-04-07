@@ -25,6 +25,7 @@ namespace IOTSASTest
 
                 using (var chain = new Chain(address))
                 {
+                    //As this is an asynchronous class, we need to capture events.
                     chain.ChainStatusChange += (o, a) =>
                     {
                         Console.WriteLine($"Chain: {a.ToString()}");
@@ -36,12 +37,12 @@ namespace IOTSASTest
                         Console.WriteLine($"Entry: {a.ToString()} {item?.ApiError?.error}");
                     };
 
+                    //Create a Chain.
                     chain.Create(Encoding.ASCII.GetBytes("This is my new chain"));
-
-                    var text = $"This is a test - hello!";
-
-                    var entry = chain.AddEntry(Encoding.ASCII.GetBytes(text));
                     Console.WriteLine($"ChainID: {chain.ChainID}");
+
+                    //Make a second entry to the chain.
+                    var entry = chain.AddEntry(Encoding.ASCII.GetBytes("This is a test - hello!"));                   
 
                     Console.ReadLine(); //Pause
                 }

@@ -11,7 +11,7 @@ namespace IOTSASTest
         SerialPort mySerial;
         
     
-        //Set up serial port.
+        //Set up serial port.  On a Raspberry Pi, use /dev/serial0
         public IOT_SAS(String device, uint baudRate = 57600)
         {
             mySerial = new SerialPort(device, (int)baudRate, Parity.None, 8, StopBits.One);
@@ -36,11 +36,14 @@ namespace IOTSASTest
         private string GetPublicECAddress()
         {
             mySerial.DiscardInBuffer();
+            
+            //Send command to IOT-SAS, asking it for the public key
             var GetEC = new byte[] { 0xFA, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 };
             mySerial.Write(GetEC, 0, GetEC.Length);
 
-            var key = new byte[52];
             
+            //Read the IOT-SAS reply, which should be a 52 byte key (TODO validation)
+            var key = new byte[52];            
             var count = 0;
             var bytesRx = 0;
             while (count < key.Length)
@@ -57,6 +60,8 @@ namespace IOTSASTest
         public byte[] SignEd25519(byte[] data)
         {
             mySerial.DiscardInBuffer();
+            
+            //Create a data buffer, which includes header, and data to be signed.
             var toSign = new byte[data.Length + 5];
             toSign[0] = 0xFA;
             toSign[1] = 0x02;
@@ -65,10 +70,11 @@ namespace IOTSASTest
             toSign[4] = (byte)data.Length;
             Array.Copy(data, 0, toSign, 5, data.Length);            
             
+            //Write the buffer to the IOT-SAS device.
             mySerial.Write(toSign, 0, toSign.Length);
 
+            //Read the IOT-SAS reply, which should be a 64 byte signature (TODO validation)
             var signature = new byte[64];
-            
             var count = 0;
             var bytesRx = 0;
             while (count < signature.Length)
