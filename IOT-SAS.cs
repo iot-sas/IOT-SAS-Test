@@ -11,16 +11,28 @@ namespace IOTSASTest
         SerialPort mySerial;
         
     
+        //Set up serial port.
         public IOT_SAS(String device, uint baudRate = 57600)
         {
-
             mySerial = new SerialPort(device, (int)baudRate, Parity.None, 8, StopBits.One);
             
             mySerial.Handshake = Handshake.None;
-            mySerial.Open();
-        
+            mySerial.Open();        
         }
 
+
+        //Make an EC address class using the IOT-SAS public key, and override the signing function
+        public FactomSharp.ECAddress GetECAddress(FactomdRestClient factomd)
+        {
+            var ecAddress = new FactomSharp.ECAddress(factomd, GetPublicECAddress());
+            ecAddress.SignFunction = (data) =>
+            {
+                    return SignEd25519(data);
+            };
+            return ecAddress;
+        }
+        
+        //Get the public key from the IOT-SAS board.
         private string GetPublicECAddress()
         {
             mySerial.DiscardInBuffer();
@@ -40,18 +52,9 @@ namespace IOTSASTest
             return Encoding.ASCII.GetString(key);
         }
 
-        public FactomSharp.ECAddress GetECAddress(FactomdRestClient factomd)
-        {
-            var ecAddress = new FactomSharp.ECAddress(factomd, GetPublicECAddress());
-            ecAddress.SignFunction = (data) =>
-            {
-                    return SignChain(data);
-            };
-            return ecAddress;
-        }
         
-
-        public byte[] SignChain(byte[] data)
+        //Sign data on the IOT-SAS board, unsing the hardware secret key.
+        public byte[] SignEd25519(byte[] data)
         {
             mySerial.DiscardInBuffer();
             var toSign = new byte[data.Length + 5];
@@ -77,34 +80,6 @@ namespace IOTSASTest
             return signature;
         }
         
-        public byte[] SignEntry(byte[] data)
-        {
-            mySerial.DiscardInBuffer();
-            var toSign = new byte[data.Length + 5];
-            toSign[0] = 0xFA;
-            toSign[1] = 0x02;
-            toSign[2] = 0x01;
-            toSign[3] = 0x0;
-            toSign[4] = (byte)data.Length;
-            Array.Copy(data, 0, toSign, 5, data.Length);            
-            
-            mySerial.Write(toSign, 0, toSign.Length);
-
-            Thread.Sleep(1000);
-
-            var signature = new byte[64];
-
-            var count = 0;
-            var bytesRx = 0;
-            while (count < signature.Length)
-            {
-                bytesRx = mySerial.Read(signature, count, signature.Length-count);
-                count += bytesRx;
-            }
-            
-            return signature;
-        }
-
         public void Dispose()
         {
             mySerial.Close();

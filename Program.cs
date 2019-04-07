@@ -12,7 +12,7 @@ namespace IOTSASTest
         public static void Main(string[] args)
         {
             //Open a connection to the IOT-SAS board
-            using (var iotsas = new IOT_SAS("/dev/ttyAMA0", 57600))
+            using (var iotsas = new IOT_SAS("/dev/serial0", 57600))
             {
                 //Open a connection to a Factom node
                 var factomd = new FactomdRestClient("https://api.factomd.net/v2");
