@@ -13,7 +13,7 @@ namespace IOTSASTest
         public static void Main(string[] args)
         {
             //Open a connection to the IOT-SAS board
-            using (var iotsas = new IOT_SAS("/dev/ttyUSB0", 57600))
+            using (var iotsas = new IOT_SAS("/dev/serial0", 57600))
             {
                 //Open a connection to a Factom node
                 var factomd = new FactomdRestClient("http://87.117.232.37:8088"); //"https://api.factomd.net/v2");
@@ -29,7 +29,7 @@ namespace IOTSASTest
                     //As this is an asynchronous class, we need to capture events.
                     chain.ChainStatusChange += (o, a) =>
                     {
-                        Console.WriteLine($"Chain: {a.ToString()}");
+                        Console.WriteLine($"Chain: {a.ToString()} {chain.ChainID} ");
                     };
 
                     chain.QueueItemStatusChange += (o, a) =>
@@ -39,11 +39,11 @@ namespace IOTSASTest
                     };
 
                     //Create a Chain.
-                    chain.Create(Encoding.ASCII.GetBytes(String.Join(" ",args)));
-                    Console.WriteLine($"ChainID: {chain.ChainID}");
+                    var text = String.Join(" ",args);
+                    chain.Create(Encoding.ASCII.GetBytes(text));
 
                     //Make a second entry to the chain.
-                    var entry = chain.AddEntry(Encoding.ASCII.GetBytes("This is a test - hello!"));                   
+//                    var entry = chain.AddEntry(Encoding.ASCII.GetBytes("This is a test - hello!"));                   
 
                     Console.ReadLine(); //Pause
                 }
