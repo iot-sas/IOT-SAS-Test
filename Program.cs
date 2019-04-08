@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FactomSharp;
 using FactomSharp.Factomd;
+using System.Linq;
 
 namespace IOTSASTest
 {
@@ -12,10 +13,10 @@ namespace IOTSASTest
         public static void Main(string[] args)
         {
             //Open a connection to the IOT-SAS board
-            using (var iotsas = new IOT_SAS("/dev/serial0", 57600))
+            using (var iotsas = new IOT_SAS("/dev/ttyUSB0", 57600))
             {
                 //Open a connection to a Factom node
-                var factomd = new FactomdRestClient("https://api.factomd.net/v2");
+                var factomd = new FactomdRestClient("http://87.117.232.37:8088"); //"https://api.factomd.net/v2");
 
                 //Get an EC address from the IOS-SAS
                 var address = iotsas.GetECAddress(factomd);  
@@ -38,7 +39,7 @@ namespace IOTSASTest
                     };
 
                     //Create a Chain.
-                    chain.Create(Encoding.ASCII.GetBytes("This is my new chain"));
+                    chain.Create(Encoding.ASCII.GetBytes(String.Join(" ",args)));
                     Console.WriteLine($"ChainID: {chain.ChainID}");
 
                     //Make a second entry to the chain.
