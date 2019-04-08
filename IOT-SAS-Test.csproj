@@ -54,7 +54,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="FactomTest">
-      <HintPath>packages\FactomSharp.0.7.0\lib\net46\FactomTest.dll</HintPath>
+      <HintPath>packages\FactomSharp.0.8.0\lib\net46\FactomTest.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
