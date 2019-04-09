@@ -12,6 +12,10 @@ namespace IOTSASTest
     {
         public static void Main(string[] args)
         {
+        
+            //Get args
+            var textMessage = String.Join(" ",args);
+
             //Open a connection to the IOT-SAS board
             using (var iotsas = new IOT_SAS("/dev/serial0", 57600))
             {
@@ -23,7 +27,9 @@ namespace IOTSASTest
                     
                 Console.WriteLine($"EC Address: {address.Public}");
                 Console.WriteLine($"Balance {address.GetBalance()}");
-
+                
+                if (String.IsNullOrEmpty(textMessage)) return;
+                
                 using (var chain = new Chain(address))
                 {
                     //As this is an asynchronous class, we need to capture events.
@@ -39,8 +45,7 @@ namespace IOTSASTest
                     };
 
                     //Create a Chain.
-                    var text = String.Join(" ",args);
-                    chain.Create(Encoding.ASCII.GetBytes(text));
+                    chain.Create(Encoding.ASCII.GetBytes(textMessage));
 
                     //Make a second entry to the chain.
 //                    var entry = chain.AddEntry(Encoding.ASCII.GetBytes("This is a test - hello!"));                   
